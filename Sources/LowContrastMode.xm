@@ -33,7 +33,7 @@ static UIColor *getCustomContrastColor() {
     if (lowContrastMode()) { \
         return kLowContrastColor; \
     } \
-    return %orig; \
+    return [super method]; \
 }
 
 #define HOOK_CCM_COLOR_METHOD(method) \
@@ -41,7 +41,7 @@ static UIColor *getCustomContrastColor() {
     if (customContrastMode()) { \
         return getCustomContrastColor(); \
     } \
-    return %orig; \
+    return [super method]; \
 }
 
 // Shared Palette Hook Macro
