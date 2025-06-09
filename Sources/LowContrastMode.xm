@@ -27,23 +27,28 @@ static UIColor *getCustomContrastColor() {
     return kLowContrastColor;
 }
 
-// Shared Color Hook Macro for Low Contrast Mode
+// Shared Color Hook Macros
 #define HOOK_LCM_COLOR_METHOD(method) \
 + (UIColor *)method { \
-    return lowContrastMode() ? kLowContrastColor : %orig; \
+    if (lowContrastMode()) { \
+        return kLowContrastColor; \
+    } \
+    return %orig; \
 }
 
-// Shared Color Hook Macro for Custom Contrast Mode
 #define HOOK_CCM_COLOR_METHOD(method) \
 + (UIColor *)method { \
-    return customContrastMode() ? getCustomContrastColor() : %orig; \
+    if (customContrastMode()) { \
+        return getCustomContrastColor(); \
+    } \
+    return %orig; \
 }
 
 // Shared Palette Hook Macro
-#define HOOK_PALETTE_METHOD(method, alpha, color) \
+#define HOOK_PALETTE_METHOD(method, alpha) \
 - (UIColor *)method { \
     if (self.pageStyle == 1) { \
-        UIColor *baseColor = color; \
+        UIColor *baseColor = lowContrastMode() ? kLowContrastColor : customContrastMode() ? getCustomContrastColor() : kDefaultTextColor; \
         return alpha < 1.0 ? [baseColor colorWithAlphaComponent:alpha] : baseColor; \
     } \
     return %orig; \
@@ -66,25 +71,24 @@ HOOK_LCM_COLOR_METHOD(quaternaryLabelColor)
 %end
 
 %hook YTCommonColorPalette
-HOOK_PALETTE_METHOD(textPrimary, 1.0, kLowContrastColor)
-HOOK_PALETTE_METHOD(textSecondary, 1.0, kLowContrastColor)
-HOOK_PALETTE_METHOD(overlayTextPrimary, 1.0, kLowContrastColor)
-HOOK_PALETTE_METHOD(overlayTextSecondary, 1.0, kLowContrastColor)
-HOOK_PALETTE_METHOD(iconActive, 1.0, kLowContrastColor)
-HOOK_PALETTE_METHOD(iconActiveOther, 1.0, kLowContrastColor)
-HOOK_PALETTE_METHOD(brandIconActive, 1.0, kLowContrastColor)
-HOOK_PALETTE_METHOD(staticBrandWhite, 1.0, kLowContrastColor)
-HOOK_PALETTE_METHOD(overlayIconActiveOther, 1.0, kLowContrastColor)
-HOOK_PALETTE_METHOD(overlayIconInactive, 0.7, kLowContrastColor)
-HOOK_PALETTE_METHOD(overlayIconDisabled, 0.3, kLowContrastColor)
-HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2, kLowContrastColor)
+HOOK_PALETTE_METHOD(textPrimary, 1.0)
+HOOK_PALETTE_METHOD(textSecondary, 1.0)
+HOOK_PALETTE_METHOD(overlayTextPrimary, 1.0)
+HOOK_PALETTE_METHOD(overlayTextSecondary, 1.0)
+HOOK_PALETTE_METHOD(iconActive, 1.0)
+HOOK_PALETTE_METHOD(iconActiveOther, 1.0)
+HOOK_PALETTE_METHOD(brandIconActive, 1.0)
+HOOK_PALETTE_METHOD(staticBrandWhite, 1.0)
+HOOK_PALETTE_METHOD(overlayIconActiveOther, 1.0)
+HOOK_PALETTE_METHOD(overlayIconInactive, 0.7)
+HOOK_PALETTE_METHOD(overlayIconDisabled, 0.3)
+HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 %end
 
 %hook YTColor
 + (BOOL)darkerPaletteTextColorEnabled {
     return NO;
 }
-
 + (UIColor *)white1 { return kDefaultTextColor; }
 + (UIColor *)white2 { return kDefaultTextColor; }
 + (UIColor *)white3 { return kDefaultTextColor; }
@@ -98,7 +102,6 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2, kLowContrastColor)
 - (void)layoutSubviews {
     %orig;
     NSArray *accessibilityLabels = @[@"connect account", @"Thanks", @"Save to playlist", @"Report"];
-    
     for (UIView *subview in self.subviews) {
         if ([accessibilityLabels containsObject:subview.accessibilityLabel]) {
             subview.backgroundColor = kLowContrastColor;
@@ -168,7 +171,6 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2, kLowContrastColor)
         [[UILabel appearance] setTextColor:kDefaultTextColor];
     }
 }
-
 - (void)setTextColor:(UIColor *)textColor {
     %orig(kDefaultTextColor);
 }
@@ -181,7 +183,6 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2, kLowContrastColor)
 %end
 
 %hook UITextView
-- (void)setTextColor elek
 - (void)setTextColor:(UIColor *)textColor {
     %orig(kDefaultTextColor);
 }
@@ -280,25 +281,24 @@ HOOK_CCM_COLOR_METHOD(quaternaryLabelColor)
 %end
 
 %hook YTCommonColorPalette
-HOOK_PALETTE_METHOD(textPrimary, 1.0, getCustomContrastColor())
-HOOK_PALETTE_METHOD(textSecondary, 1.0, getCustomContrastColor())
-HOOK_PALETTE_METHOD(overlayTextPrimary, 1.0, getCustomContrastColor())
-HOOK_PALETTE_METHOD(overlayTextSecondary, 1.0, getCustomContrastColor())
-HOOK_PALETTE_METHOD(iconActive, 1.0, getCustomContrastColor())
-HOOK_PALETTE_METHOD(iconActiveOther, 1.0, getCustomContrastColor())
-HOOK_PALETTE_METHOD(brandIconActive, 1.0, getCustomContrastColor())
-HOOK_PALETTE_METHOD(staticBrandWhite, 1.0, getCustomContrastColor())
-HOOK_PALETTE_METHOD(overlayIconActiveOther, 1.0, getCustomContrastColor())
-HOOK_PALETTE_METHOD(overlayIconInactive, 0.7, getCustomContrastColor())
-HOOK_PALETTE_METHOD(overlayIconDisabled, 0.3, getCustomContrastColor())
-HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2, getCustomContrastColor())
+HOOK_PALETTE_METHOD(textPrimary, 1.0)
+HOOK_PALETTE_METHOD(textSecondary, 1.0)
+HOOK_PALETTE_METHOD(overlayTextPrimary, 1.0)
+HOOK_PALETTE_METHOD(overlayTextSecondary, 1.0)
+HOOK_PALETTE_METHOD(iconActive, 1.0)
+HOOK_PALETTE_METHOD(iconActiveOther, 1.0)
+HOOK_PALETTE_METHOD(brandIconActive, 1.0)
+HOOK_PALETTE_METHOD(staticBrandWhite, 1.0)
+HOOK_PALETTE_METHOD(overlayIconActiveOther, 1.0)
+HOOK_PALETTE_METHOD(overlayIconInactive, 0.7)
+HOOK_PALETTE_METHOD(overlayIconDisabled, 0.3)
+HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 %end
 
 %hook YTColor
 + (BOOL)darkerPaletteTextColorEnabled {
     return NO;
 }
-
 + (UIColor *)white1 { return kDefaultTextColor; }
 + (UIColor *)white2 { return kDefaultTextColor; }
 + (UIColor *)white3 { return kDefaultTextColor; }
@@ -312,7 +312,6 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2, getCustomContrastColor())
 - (void)layoutSubviews {
     %orig;
     NSArray *accessibilityLabels = @[@"connect account", @"Thanks", @"Save to playlist", @"Report"];
-    
     for (UIView *subview in self.subviews) {
         if ([accessibilityLabels containsObject:subview.accessibilityLabel]) {
             subview.backgroundColor = getCustomContrastColor();
@@ -382,7 +381,6 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2, getCustomContrastColor())
         [[UILabel appearance] setTextColor:kDefaultTextColor];
     }
 }
-
 - (void)setTextColor:(UIColor *)textColor {
     %orig(kDefaultTextColor);
 }
@@ -430,7 +428,7 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2, getCustomContrastColor())
 
 %hook NSAttributedString
 - (instancetype)initWithString:(NSString *)str attributes:(NSDictionary<NSAttributedStringKey, id> *)attrs {
-    NSMutableDictionary *modifiedAttributes = [NSMutableDictionary dictionaryWithDictionary:attributes];
+    NSMutableDictionary *modifiedAttributes = [NSMutableDictionary dictionaryWithDictionary:attrs];
     [modifiedAttributes setObject:kDefaultTextColor forKey:NSForegroundColorAttributeName];
     return %orig(str, modifiedAttributes);
 }
