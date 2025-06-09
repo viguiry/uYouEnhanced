@@ -51,7 +51,7 @@ static UIColor *getCustomContrastColor() {
         UIColor *baseColor = lowContrastMode() ? kLowContrastColor : customContrastMode() ? getCustomContrastColor() : kDefaultTextColor; \
         return alpha < 1.0 ? [baseColor colorWithAlphaComponent:alpha] : baseColor; \
     } \
-    return %orig; \
+    return [super method]; \
 }
 
 %group gLowContrastMode // Low Contrast Mode v1.7.0 (Compatible with only YouTube v19.01.1-v20.21.6)
