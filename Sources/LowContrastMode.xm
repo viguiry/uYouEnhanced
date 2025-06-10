@@ -1,112 +1,104 @@
 #import "uYouPlus.h"
 
-// Constants
-static UIColor *const kLowContrastColor = [UIColor colorWithRed:0.56 green:0.56 blue:0.56 alpha:1.00];
+// Color Configuration
+static UIColor *lcmHexColor = nil;
+static UIColor *const kLowContrastColor = [UIColor colorWithRed:0.56 green:0.56 blue:0.56 alpha:1.0];
 static UIColor *const kDefaultTextColor = [UIColor whiteColor];
 
-// Helper Functions
-static int contrastMode() {
+// Utility Functions
+static inline int contrastMode() {
     return [[NSUserDefaults standardUserDefaults] integerForKey:@"lcm"];
 }
 
-static BOOL lowContrastMode() {
+static inline BOOL lowContrastMode() {
     return IS_ENABLED(@"lowContrastMode_enabled") && contrastMode() == 0;
 }
 
-static BOOL customContrastMode() {
+static inline BOOL customContrastMode() {
     return IS_ENABLED(@"lowContrastMode_enabled") && contrastMode() == 1;
 }
 
-static UIColor *getCustomContrastColor() {
-    NSData *colorData = [[NSUserDefaults standardUserDefaults] objectForKey:@"kCustomUIColor"];
-    if (colorData) {
-        NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:colorData error:nil];
-        [unarchiver setRequiresSecureCoding:NO];
-        return [unarchiver decodeObjectForKey:NSKeyedArchiveRootObjectKey] ?: kLowContrastColor;
-    }
-    return kLowContrastColor;
+static inline UIColor *activeColor() {
+    return customContrastMode() && lcmHexColor ? lcmHexColor : kLowContrastColor;
 }
 
-// Shared Color Hook Macros
-#define HOOK_LCM_COLOR_METHOD(method) \
-+ (UIColor *)method { \
-    if (lowContrastMode()) { \
-        return kLowContrastColor; \
-    } \
-    return [super method]; \
-}
-
-#define HOOK_CCM_COLOR_METHOD(method) \
-+ (UIColor *)method { \
-    if (customContrastMode()) { \
-        return getCustomContrastColor(); \
-    } \
-    return [super method]; \
-}
-
-// Shared Palette Hook Macro
-#define HOOK_PALETTE_METHOD(method, alpha) \
-- (UIColor *)method { \
-    if (self.pageStyle == 1) { \
-        UIColor *baseColor = lowContrastMode() ? kLowContrastColor : customContrastMode() ? getCustomContrastColor() : kDefaultTextColor; \
-        return alpha < 1.0 ? [baseColor colorWithAlphaComponent:alpha] : baseColor; \
-    } \
-    return [super method]; \
-}
-
-%group gLowContrastMode // Low Contrast Mode v1.7.0 (Compatible with only YouTube v19.01.1-v20.21.6)
+// Low Contrast Mode v1.7.1 (Compatible with only YouTube v19.01.1-v20.21.6)
+%group gLowContrastMode
 %hook UIColor
-HOOK_LCM_COLOR_METHOD(whiteColor)
-HOOK_LCM_COLOR_METHOD(lightTextColor)
-HOOK_LCM_COLOR_METHOD(lightGrayColor)
-HOOK_LCM_COLOR_METHOD(ychGrey7)
-HOOK_LCM_COLOR_METHOD(skt_chipBackgroundColor)
-HOOK_LCM_COLOR_METHOD(placeholderTextColor)
-HOOK_LCM_COLOR_METHOD(systemLightGrayColor)
-HOOK_LCM_COLOR_METHOD(systemExtraLightGrayColor)
-HOOK_LCM_COLOR_METHOD(labelColor)
-HOOK_LCM_COLOR_METHOD(secondaryLabelColor)
-HOOK_LCM_COLOR_METHOD(tertiaryLabelColor)
-HOOK_LCM_COLOR_METHOD(quaternaryLabelColor)
++ (UIColor *)colorNamed:(NSString *)name {
+    NSArray<NSString *> *targetColors = @[
+        @"whiteColor", @"lightTextColor", @"lightGrayColor", @"ychGrey7",
+        @"skt_chipBackgroundColor", @"placeholderTextColor", @"systemLightGrayColor",
+        @"systemExtraLightGrayColor", @"labelColor", @"secondaryLabelColor",
+        @"tertiaryLabelColor", @"quaternaryLabelColor"
+    ];
+    return [targetColors containsObject:name] ? kLowContrastColor : %orig;
+}
+
++ (UIColor *)whiteColor { return kLowContrastColor; }
++ (UIColor *)lightTextColor { return kLowContrastColor; }
++ (UIColor *)lightGrayColor { return kLowContrastColor; }
 %end
 
 %hook YTCommonColorPalette
-HOOK_PALETTE_METHOD(textPrimary, 1.0)
-HOOK_PALETTE_METHOD(textSecondary, 1.0)
-HOOK_PALETTE_METHOD(overlayTextPrimary, 1.0)
-HOOK_PALETTE_METHOD(overlayTextSecondary, 1.0)
-HOOK_PALETTE_METHOD(iconActive, 1.0)
-HOOK_PALETTE_METHOD(iconActiveOther, 1.0)
-HOOK_PALETTE_METHOD(brandIconActive, 1.0)
-HOOK_PALETTE_METHOD(staticBrandWhite, 1.0)
-HOOK_PALETTE_METHOD(overlayIconActiveOther, 1.0)
-HOOK_PALETTE_METHOD(overlayIconInactive, 0.7)
-HOOK_PALETTE_METHOD(overlayIconDisabled, 0.3)
-HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
+- (UIColor *)textPrimary {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)textSecondary {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)overlayTextPrimary {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)overlayTextSecondary {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)iconActive {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)iconActiveOther {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)brandIconActive {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)staticBrandWhite {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)overlayIconActiveOther {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)overlayIconInactive {
+    return self.pageStyle == 1 ? [kDefaultTextColor colorWithAlphaComponent:0.7] : %orig;
+}
+- (UIColor *)overlayIconDisabled {
+    return self.pageStyle == 1 ? [kDefaultTextColor colorWithAlphaComponent:0.3] : %orig;
+}
+- (UIColor *)overlayFilledButtonActive {
+    return self.pageStyle == 1 ? [kDefaultTextColor colorWithAlphaComponent:0.2] : %orig;
+}
 %end
 
 %hook YTColor
-+ (BOOL)darkerPaletteTextColorEnabled {
-    return NO;
-}
-+ (UIColor *)white1 { return kDefaultTextColor; }
-+ (UIColor *)white2 { return kDefaultTextColor; }
-+ (UIColor *)white3 { return kDefaultTextColor; }
-+ (UIColor *)white4 { return kDefaultTextColor; }
-+ (UIColor *)white5 { return kDefaultTextColor; }
-+ (UIColor *)grey1 { return kDefaultTextColor; }
-+ (UIColor *)grey2 { return kDefaultTextColor; }
++ (BOOL)darkerPaletteTextColorEnabled { return NO; }
++ (UIColor *)white1 { return kLowContrastColor; }
++ (UIColor *)white2 { return kLowContrastColor; }
++ (UIColor *)white3 { return kLowContrastColor; }
++ (UIColor *)white4 { return kLowContrastColor; }
++ (UIColor *)white5 { return kLowContrastColor; }
++ (UIColor *)grey1 { return kLowContrastColor; }
++ (UIColor *)grey2 { return kLowContrastColor; }
 %end
 
 %hook _ASDisplayView
 - (void)layoutSubviews {
     %orig;
-    NSArray *accessibilityLabels = @[@"connect account", @"Thanks", @"Save to playlist", @"Report"];
+    NSArray<NSString *> *targetLabels = @[@"connect account", @"Thanks", @"Save to playlist", @"Report"];
     for (UIView *subview in self.subviews) {
-        if ([accessibilityLabels containsObject:subview.accessibilityLabel]) {
+        if ([targetLabels containsObject:subview.accessibilityLabel]) {
             subview.backgroundColor = kLowContrastColor;
             if ([subview isKindOfClass:[UILabel class]]) {
-                [(UILabel *)subview setTextColor:[UIColor blackColor]];
+                ((UILabel *)subview).textColor = [UIColor blackColor];
             }
         }
     }
@@ -124,9 +116,11 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 - (UIColor *)brightAccentColor { return kDefaultTextColor; }
 - (UIColor *)regularColor { return kDefaultTextColor; }
 - (UIColor *)darkerColor { return kDefaultTextColor; }
+- - (UIColor *)Color { return kDefaultTextColor; }
 - (UIColor *)bodyTextColor { return kDefaultTextColor; }
 - (UIColor *)lightBodyTextColor { return kDefaultTextColor; }
 - (UIColor *)bodyTextColorOnRegularColor { return kDefaultTextColor; }
+- (UIColor *)bodyTextColor { return kDefaultTextColor; }
 - (UIColor *)bodyTextColorOnLighterColor { return kDefaultTextColor; }
 - (UIColor *)bodyTextColorOnDarkerColor { return kDefaultTextColor; }
 - (UIColor *)bodyTextColorOnAccentColor { return kDefaultTextColor; }
@@ -149,13 +143,13 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 
 %hook UIExtendedSRGBColorSpace
 - (void)setTextColor:(UIColor *)textColor {
-    %orig(kDefaultTextColor);
+    %orig([kDefaultTextColor colorWithAlphaComponent:1.0]);
 }
 %end
 
 %hook UIExtendedGrayColorSpace
 - (void)setTextColor:(UIColor *)textColor {
-    %orig(kDefaultTextColor);
+    %orig([kDefaultTextColor colorWithAlphaComponent:1.0]);
 }
 %end
 
@@ -167,9 +161,7 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 
 %hook UILabel
 + (void)load {
-    @autoreleasepool {
-        [[UILabel appearance] setTextColor:kDefaultTextColor];
-    }
+    [[UILabel appearance] setTextColor:kDefaultTextColor];
 }
 - (void)setTextColor:(UIColor *)textColor {
     %orig(kDefaultTextColor);
@@ -197,7 +189,7 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 %hook UISegmentedControl
 - (void)setTitleTextAttributes:(NSDictionary *)attributes forState:(UIControlState)state {
     NSMutableDictionary *modifiedAttributes = [NSMutableDictionary dictionaryWithDictionary:attributes];
-    [modifiedAttributes setObject:kDefaultTextColor forKey:NSForegroundColorAttributeName];
+    modifiedAttributes[NSForegroundColorAttributeName] = kDefaultTextColor;
     %orig(modifiedAttributes, state);
 }
 %end
@@ -211,7 +203,7 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 %hook UIBarButtonItem
 - (void)setTitleTextAttributes:(NSDictionary *)attributes forState:(UIControlState)state {
     NSMutableDictionary *modifiedAttributes = [NSMutableDictionary dictionaryWithDictionary:attributes];
-    [modifiedAttributes setObject:kDefaultTextColor forKey:NSForegroundColorAttributeName];
+    modifiedAttributes[NSForegroundColorAttributeName] = kDefaultTextColor;
     %orig(modifiedAttributes, state);
 }
 %end
@@ -219,7 +211,7 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 %hook NSAttributedString
 - (instancetype)initWithString:(NSString *)str attributes:(NSDictionary<NSAttributedStringKey, id> *)attrs {
     NSMutableDictionary *modifiedAttributes = [NSMutableDictionary dictionaryWithDictionary:attrs];
-    [modifiedAttributes setObject:kDefaultTextColor forKey:NSForegroundColorAttributeName];
+    modifiedAttributes[NSForegroundColorAttributeName] = kDefaultTextColor;
     return %orig(str, modifiedAttributes);
 }
 %end
@@ -264,59 +256,83 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 %end
 %end
 
+// Custom Contrast Mode
 %group gCustomContrastMode
 %hook UIColor
-HOOK_CCM_COLOR_METHOD(whiteColor)
-HOOK_CCM_COLOR_METHOD(lightTextColor)
-HOOK_CCM_COLOR_METHOD(lightGrayColor)
-HOOK_CCM_COLOR_METHOD(ychGrey7)
-HOOK_CCM_COLOR_METHOD(skt_chipBackgroundColor)
-HOOK_CCM_COLOR_METHOD(placeholderTextColor)
-HOOK_CCM_COLOR_METHOD(systemLightGrayColor)
-HOOK_CCM_COLOR_METHOD(systemExtraLightGrayColor)
-HOOK_CCM_COLOR_METHOD(labelColor)
-HOOK_CCM_COLOR_METHOD(secondaryLabelColor)
-HOOK_CCM_COLOR_METHOD(tertiaryLabelColor)
-HOOK_CCM_COLOR_METHOD(quaternaryLabelColor)
++ (UIColor *)colorNamed:(NSString *)name {
+    NSArray<NSString *> *targetColors = @[
+        @"whiteColor", @"lightTextColor", @"lightGrayColor", @"ychGrey7",
+        @"skt_chipBackgroundColor", @"placeholderTextColor", @"systemLightGrayColor",
+        @"systemExtraLightGrayColor", @"labelColor", @"secondaryLabelColor",
+        @"tertiaryLabelColor", @"quaternaryLabelColor"
+    ];
+    return [targetColors containsObject:name] ? lcmHexColor : %orig;
+}
+
++ (UIColor *)whiteColor { return lcmHexColor; }
++ (UIColor *)lightTextColor { return lcmHexColor; }
++ (UIColor *)lightGrayColor { return lcmHexColor; }
 %end
 
 %hook YTCommonColorPalette
-HOOK_PALETTE_METHOD(textPrimary, 1.0)
-HOOK_PALETTE_METHOD(textSecondary, 1.0)
-HOOK_PALETTE_METHOD(overlayTextPrimary, 1.0)
-HOOK_PALETTE_METHOD(overlayTextSecondary, 1.0)
-HOOK_PALETTE_METHOD(iconActive, 1.0)
-HOOK_PALETTE_METHOD(iconActiveOther, 1.0)
-HOOK_PALETTE_METHOD(brandIconActive, 1.0)
-HOOK_PALETTE_METHOD(staticBrandWhite, 1.0)
-HOOK_PALETTE_METHOD(overlayIconActiveOther, 1.0)
-HOOK_PALETTE_METHOD(overlayIconInactive, 0.7)
-HOOK_PALETTE_METHOD(overlayIconDisabled, 0.3)
-HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
+- (UIColor *)textPrimary {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)textSecondary {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)overlayTextPrimary {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)overlayTextSecondary {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)iconActive {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)iconActiveOther {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)brandIconActive {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)staticBrandWhite {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)overlayIconActiveOther {
+    return self.pageStyle == 1 ? kDefaultTextColor : %orig;
+}
+- (UIColor *)overlayIconInactive {
+    return self.pageStyle == 1 ? [kDefaultTextColor colorWithAlphaComponent:0.7] : %orig;
+}
+- (UIColor *)overlayIconDisabled {
+    return self.pageStyle == 1 ? [kDefaultTextColor colorWithAlphaComponent:0.3] : %orig;
+}
+- (UIColor *)overlayFilledButtonActive {
+    return self.pageStyle == 1 ? [kDefaultTextColor colorWithAlphaComponent:0.2] : %orig;
+}
 %end
 
 %hook YTColor
-+ (BOOL)darkerPaletteTextColorEnabled {
-    return NO;
-}
-+ (UIColor *)white1 { return kDefaultTextColor; }
-+ (UIColor *)white2 { return kDefaultTextColor; }
-+ (UIColor *)white3 { return kDefaultTextColor; }
-+ (UIColor *)white4 { return kDefaultTextColor; }
-+ (UIColor *)white5 { return kDefaultTextColor; }
-+ (UIColor *)grey1 { return kDefaultTextColor; }
-+ (UIColor *)grey2 { return kDefaultTextColor; }
++ (BOOL)darkerPaletteTextColorEnabled { return NO; }
++ (UIColor *)white1 { return lcmHexColor; }
++ (UIColor *)white2 { return lcmHexColor; }
++ (UIColor *)white3 { return lcmHexColor; }
++ (UIColor *)white4 { return lcmHexColor; }
++ (UIColor *)white5 { return lcmHexColor; }
++ (UIColor *)grey1 { return lcmHexColor; }
++ (UIColor *)grey2 { return lcmHexColor; }
 %end
 
 %hook _ASDisplayView
 - (void)layoutSubviews {
     %orig;
-    NSArray *accessibilityLabels = @[@"connect account", @"Thanks", @"Save to playlist", @"Report"];
+    NSArray<NSString *> *targetLabels = @[@"connect account", @"Thanks", @"Save to playlist", @"Report"];
     for (UIView *subview in self.subviews) {
-        if ([accessibilityLabels containsObject:subview.accessibilityLabel]) {
-            subview.backgroundColor = getCustomContrastColor();
+        if ([targetLabels containsObject:subview.accessibilityLabel]) {
+            subview.backgroundColor = lcmHexColor;
             if ([subview isKindOfClass:[UILabel class]]) {
-                [(UILabel *)subview setTextColor:[UIColor blackColor]];
+                ((UILabel *)subview).textColor = [UIColor blackColor];
             }
         }
     }
@@ -359,13 +375,13 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 
 %hook UIExtendedSRGBColorSpace
 - (void)setTextColor:(UIColor *)textColor {
-    %orig(kDefaultTextColor);
+    %orig([kDefaultTextColor colorWithAlphaComponent:1.0]);
 }
 %end
 
 %hook UIExtendedGrayColorSpace
 - (void)setTextColor:(UIColor *)textColor {
-    %orig(kDefaultTextColor);
+    %orig([kDefaultTextColor colorWithAlphaComponent:1.0]);
 }
 %end
 
@@ -377,9 +393,7 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 
 %hook UILabel
 + (void)load {
-    @autoreleasepool {
-        [[UILabel appearance] setTextColor:kDefaultTextColor];
-    }
+    [[UILabel appearance] setTextColor:kDefaultTextColor];
 }
 - (void)setTextColor:(UIColor *)textColor {
     %orig(kDefaultTextColor);
@@ -407,7 +421,7 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 %hook UISegmentedControl
 - (void)setTitleTextAttributes:(NSDictionary *)attributes forState:(UIControlState)state {
     NSMutableDictionary *modifiedAttributes = [NSMutableDictionary dictionaryWithDictionary:attributes];
-    [modifiedAttributes setObject:kDefaultTextColor forKey:NSForegroundColorAttributeName];
+    modifiedAttributes[NSForegroundColorAttributeName] = kDefaultTextColor;
     %orig(modifiedAttributes, state);
 }
 %end
@@ -421,7 +435,7 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 %hook UIBarButtonItem
 - (void)setTitleTextAttributes:(NSDictionary *)attributes forState:(UIControlState)state {
     NSMutableDictionary *modifiedAttributes = [NSMutableDictionary dictionaryWithDictionary:attributes];
-    [modifiedAttributes setObject:kDefaultTextColor forKey:NSForegroundColorAttributeName];
+    modifiedAttributes[NSForegroundColorAttributeName] = kDefaultTextColor;
     %orig(modifiedAttributes, state);
 }
 %end
@@ -429,13 +443,13 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 %hook NSAttributedString
 - (instancetype)initWithString:(NSString *)str attributes:(NSDictionary<NSAttributedStringKey, id> *)attrs {
     NSMutableDictionary *modifiedAttributes = [NSMutableDictionary dictionaryWithDictionary:attrs];
-    [modifiedAttributes setObject:kDefaultTextColor forKey:NSForegroundColorAttributeName];
+    modifiedAttributes[NSForegroundColorAttributeName] = kDefaultTextColor;
     return %orig(str, modifiedAttributes);
 }
 %end
 
 %hook CATextLayer
-- (void)setTextColor:(CGColorRef)textColor {
+- (void)setTextColor:(CGColorRef)color {
     %orig(kDefaultTextColor.CGColor);
 }
 %end
@@ -474,12 +488,24 @@ HOOK_PALETTE_METHOD(overlayFilledButtonActive, 0.2)
 %end
 %end
 
+// Constructor
 %ctor {
     %init;
     if (lowContrastMode()) {
         %init(gLowContrastMode);
     }
     if (customContrastMode()) {
-        %init(gCustomContrastMode);
+        NSData *colorData = [[NSUserDefaults standardUserDefaults] objectForKey:@"kCustomUIColor"];
+        if (colorData) {
+            NSError *error = nil;
+            NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingFromData:colorData error:&error];
+            if (!error) {
+                [unarchiver setRequiresSecureCoding:NO];
+                lcmHexColor = [unarchiver decodeObjectForKey:NSKeyedArchiveRootObjectKey];
+                if (lcmHexColor) {
+                    %init(gCustomContrastMode);
+                }
+            }
+        }
     }
 }
