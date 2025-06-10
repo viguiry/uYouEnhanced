@@ -18,11 +18,11 @@ static inline BOOL customContrastMode() {
     return IS_ENABLED(@"lowContrastMode_enabled") && contrastMode() == 1;
 }
 
-static inline UIColor *activeColor() {
-    return customContrastMode() && lcmHexColor ? lcmHexColor : kLowContrastColor;
-}
+// static inline UIColor *activeColor() {
+//     return customContrastMode() && lcmHexColor ? lcmHexColor : kLowContrastColor;
+// }
 
-// Low Contrast Mode v1.7.1 (Compatible with only YouTube v19.01.1-v20.21.6)
+// Low Contrast Mode v1.7.1.1 (Compatible with only YouTube v19.01.1-v20.21.6)
 %group gLowContrastMode
 %hook UIColor
 + (UIColor *)colorNamed:(NSString *)name {
@@ -116,15 +116,14 @@ static inline UIColor *activeColor() {
 - (UIColor *)brightAccentColor { return kDefaultTextColor; }
 - (UIColor *)regularColor { return kDefaultTextColor; }
 - (UIColor *)darkerColor { return kDefaultTextColor; }
-- - (UIColor *)Color { return kDefaultTextColor; }
 - (UIColor *)bodyTextColor { return kDefaultTextColor; }
 - (UIColor *)lightBodyTextColor { return kDefaultTextColor; }
 - (UIColor *)bodyTextColorOnRegularColor { return kDefaultTextColor; }
-- (UIColor *)bodyTextColor { return kDefaultTextColor; }
 - (UIColor *)bodyTextColorOnLighterColor { return kDefaultTextColor; }
 - (UIColor *)bodyTextColorOnDarkerColor { return kDefaultTextColor; }
 - (UIColor *)bodyTextColorOnAccentColor { return kDefaultTextColor; }
 - (UIColor *)buttonBackgroundColor { return kDefaultTextColor; }
+- (UIColor *)Color { return kDefaultTextColor; }
 %end
 
 %hook YTQTMButton
@@ -357,6 +356,7 @@ static inline UIColor *activeColor() {
 - (UIColor *)bodyTextColorOnDarkerColor { return kDefaultTextColor; }
 - (UIColor *)bodyTextColorOnAccentColor { return kDefaultTextColor; }
 - (UIColor *)buttonBackgroundColor { return kDefaultTextColor; }
+- (UIColor *)Color { return kDefaultTextColor; }
 %end
 
 %hook YTQTMButton
