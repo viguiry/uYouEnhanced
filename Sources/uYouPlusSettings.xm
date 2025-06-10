@@ -570,23 +570,35 @@ NSString *cacheDescription = [NSString stringWithFormat:@"%@", GetCacheSize()];
                 NSComparisonResult result1 = [appVersion compare:@"17.33.2" options:NSNumericSearch];
                 NSComparisonResult result2 = [appVersion compare:@"17.38.10" options:NSNumericSearch];
                 if (result1 == NSOrderedAscending) {
-                    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Discontinued" message:[NSString stringWithFormat:@"You are using v%@ which is a discontinued version of YouTube that no longer works. Please use v17.33.2-17.38.10 in order to use LowContrastMode.", appVersion] preferredStyle:UIAlertControllerStyleAlert];
-                    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
+                    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Discontinued Version" message:[NSString stringWithFormat:@"You are using v%@, a discontinued version of YouTube that may not work with LowContrastMode. Supported versions are v17.33.2-v17.38.10. Enable anyway?", appVersion] preferredStyle:UIAlertControllerStyleAlert];
+                    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Enable" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        [[NSUserDefaults standardUserDefaults] setBool:enable forKey:kLowContrastMode];
+                        [settingsViewController reloadData];
+                        SHOW_RELAUNCH_YT_SNACKBAR;
+                    }];
+                    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
                     [alert addAction:okAction];
+                    [alert addAction:cancelAction];
                     [settingsViewController presentViewController:alert animated:YES completion:nil];
                     return NO;
                 } else if (result2 == NSOrderedDescending) {
-                    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Incompatible" message:[NSString stringWithFormat:@"LowContrastMode is only available for app versions v17.33.2-v17.38.10. \nYou are currently using v%@. \nWorkaround: if you want to use this then I recommend enabling \"Fix LowContrastMode\" Option.", appVersion] preferredStyle:UIAlertControllerStyleAlert];
+                    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Incompatible Version" message:[NSString stringWithFormat:@"LowContrastMode is only available for app versions v17.33.2-v17.38.10. You are using v%@. Enable anyway?", appVersion] preferredStyle:UIAlertControllerStyleAlert];
+                    UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"Enable" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                        [[NSUserDefaults standardUserDefaults] setBool:enable forKey:kLowContrastMode];
+                        [settingsViewController reloadData];
+                        SHOW_RELAUNCH_YT_SNACKBAR;
+                    }];
+                    UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:nil];
+                    [alert addAction:okAction];
+                    [alert addAction:cancelAction];
+                    [settingsViewController presentViewController:alert animated:YES completion:nil];
+                    return NO;
+                } else if (UIScreen.mainScreen.traitCollection.userInterfaceStyle != UIUserInterfaceStyleDark) {
+                    UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Light Mode Detected" message:@"LowContrastMode is only available in Dark Mode. Please switch to Dark Mode to be able to use LowContrastMode." preferredStyle:UIAlertControllerStyleAlert];
                     UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
                     [alert addAction:okAction];
                     [settingsViewController presentViewController:alert animated:YES completion:nil];
                     return NO;
-            } else if (UIScreen.mainScreen.traitCollection.userInterfaceStyle != UIUserInterfaceStyleDark) {
-                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Light Mode Detected" message:@"LowContrastMode is only available in Dark Mode. Please switch to Dark Mode to be able to use LowContrastMode." preferredStyle:UIAlertControllerStyleAlert];
-                UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"OK" style:UIAlertActionStyleDefault handler:nil];
-                [alert addAction:okAction];
-                [settingsViewController presentViewController:alert animated:YES completion:nil];
-                return NO;
                 }
             }
             [[NSUserDefaults standardUserDefaults] setBool:enable forKey:kLowContrastMode];
