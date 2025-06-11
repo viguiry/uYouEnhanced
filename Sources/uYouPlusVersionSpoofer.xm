@@ -90,7 +90,8 @@ static VersionMapping versionMappings[] = {
     {81, @"19.04.3"},
     {82, @"19.03.2"},
     {83, @"19.02.1"},
-    {84, @"19.01.1"}
+    {84, @"19.01.1"},
+    {85, @"20.20.3"}
 };
 
 static int appVersionSpoofer() {

@@ -5,7 +5,7 @@ Just wanted to give you an update about uYouEnhanced. I’m not fully leaving or
 
 I do my best to fix stuff when issues pop up, but it sometimes usually doesn’t work out. I do even suggest workarounds, but they might not work perfectly, especially with the latest YouTube version changes.
 
-But as of writing this, I’d recommend using uYouEnhanced with YouTube version v20.05.4 (the ipa version I use).
+But as of writing this, I’d recommend using uYouEnhanced with YouTube version v20.20.3 (the ipa version I use).
 Thanks for understanding!
 
 And thanks to qnblackcat, PoomSmart & other developers allowing me to expand this fork from where it is today!
@@ -315,7 +315,7 @@ And thanks to qnblackcat, PoomSmart & other developers allowing me to expand thi
 
 | **Tweaks/App** | **Developer** | **Version** | **Open source** |
 | - | - | :-: | :-:  |
-| **YouTube** | Google Inc | 20.10.4 | ✖︎ |
+| **YouTube** | Google Inc | 20.20.3 | ✖︎ |
 | [uYou](https://github.com/MiRO92/uYou-for-YouTube) | [MiRO92](https://twitter.com/miro92) | 3.0.4 | ✖︎ |
 | **OpenYoutubeAndShorts** | [CrossiDev-Studio](https://github.com/CrossiDev-Studio) | 1.0 | [✔︎](https://github.com/CrossiDev-Studio/OpenYoutubeAndShorts) |
 | **iSponsorBlock** | [Galactic-Dev](https://github.com/Galactic-Dev) | 1.2.9 | [✔︎](https://github.com/Galactic-Dev/iSponsorBlock) |

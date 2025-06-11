@@ -848,6 +848,8 @@ NSString *cacheDescription = [NSString stringWithFormat:@"%@", GetCacheSize()];
                     return @"v19.02.1";
                 case 84:
                     return @"v19.01.1";
+                case 85:
+                    return @"v20.20.3";
                 default:
                     return @"v20.23.3";
             }
@@ -938,7 +940,8 @@ NSString *cacheDescription = [NSString stringWithFormat:@"%@", GetCacheSize()];
                 SPOOFER_VERSION(@"v19.04.3", 81),
                 SPOOFER_VERSION(@"v19.03.2", 82),
                 SPOOFER_VERSION(@"v19.02.1", 83),
-                SPOOFER_VERSION(@"v19.01.1", 84)
+                SPOOFER_VERSION(@"v19.01.1", 84),
+                SPOOFER_VERSION(@"v20.20.3", 85)
             ];
             YTSettingsPickerViewController *picker = [[%c(YTSettingsPickerViewController) alloc] initWithNavTitle:LOC(@"VERSION_SPOOFER_SELECTOR") pickerSectionTitle:nil rows:rows selectedItemIndex:appVersionSpoofer() parentResponder:[self parentResponder]];
             [settingsViewController pushViewController:picker];
